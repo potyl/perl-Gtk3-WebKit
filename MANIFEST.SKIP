@@ -1,0 +1,7 @@
+^Makefile$
+^Makefile[.]old$
+^blib/
+^Gtk3-WebKit-
+^pm_to_blib$
+[.]gitignore
+^[.]git/
