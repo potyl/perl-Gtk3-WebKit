@@ -11,6 +11,9 @@ JSEvaluateScript (WebKitWebFrame *frame, char *script, char *url = NULL, int lin
         JSGlobalContextRef context;
         JSStringRef js_script, js_url;
         JSValueRef value;
+        JSStringRef js_value;
+        gint max_size;
+        gchar* str_value;
 
         context = webkit_web_frame_get_global_context(frame);
 
@@ -20,24 +23,14 @@ JSEvaluateScript (WebKitWebFrame *frame, char *script, char *url = NULL, int lin
         JSStringRelease(js_script);
         JSStringRelease(js_url);
 
-        if (! JSValueIsString(context, value)) {
-            printf("Value is not a string\n");
-            RETVAL = &PL_sv_undef;
-        }
-        else {
-            JSStringRef js_value;
-            gint max_size;
-            gchar* str_value;
+        js_value = JSValueCreateJSONString(context, value, 0, NULL);
+        max_size = JSStringGetMaximumUTF8CStringSize(js_value);
+        str_value = g_malloc(max_size);
+        JSStringGetUTF8CString(js_value, str_value, max_size);
+        JSStringRelease(js_value);
 
-            js_value = JSValueToStringCopy(context, value, NULL);
-            max_size = JSStringGetMaximumUTF8CStringSize(js_value);
-            str_value = g_malloc(max_size);
-            JSStringGetUTF8CString(js_value, str_value, max_size);
-            JSStringRelease(js_value);
-
-            RETVAL = newSVpv(str_value, 0);
-            g_free(str_value);
-        }
+        RETVAL = newSVpv(str_value, 0);
+        g_free(str_value);
 
     OUTPUT:
         RETVAL
