@@ -31,7 +31,7 @@ sub main {
 	);
 
 	eval {
-		%pkgconfig = ExtUtils::PkgConfig->find("libwebkit-3.0");
+		%pkgconfig = ExtUtils::PkgConfig->find("webkitgtk-3.0");
 		push @XS_FILES, <xs/*.xs>;
 		push @typemaps, 'maps';
 		push @deps, 'Glib';
