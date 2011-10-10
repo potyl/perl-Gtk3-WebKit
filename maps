@@ -1,1 +1,1 @@
-WEBKIT_TYPE_WEBKIT_WEBFRAME        WebKitWebFrame        GObject        Gtk3::WebKit::WebFrame
+WEBKIT_TYPE_WEB_FRAME        WebKitWebFrame        GObject        Gtk3::WebKit::WebFrame
