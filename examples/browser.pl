@@ -23,7 +23,8 @@ use warnings;
 
 use Gtk3 -init;
 use Gtk3::WebKit;
-
+use JSON qw(decode_json);
+use Data::Dumper;
 
 sub main {
     my ($url) = shift @ARGV || 'http://search.cpan.org/';
@@ -34,6 +35,20 @@ sub main {
 
     # Create a WebKit widget
     my $view = Gtk3::WebKit::WebView->new();
+
+    $view->signal_connect('notify::load-status' => sub {
+        return unless $view->get_uri and ($view->get_load_status eq 'finished');
+        print "Document loaded\n";
+        my $frame = $view->get_main_frame();
+        print "Frame is $frame\n";
+        my $json = $frame->JSEvaluateScript(
+            "window.document.getElementsByTagName('title');",
+#            "[ 0, 1, 2 ];",
+        );
+        print "JSON: ", Dumper($json);
+        my $data = $json eq '' ? '' : decode_json($json);
+        print "Data: ", Dumper($data);
+    });
 
     # Load a page
     $view->load_uri($url);
