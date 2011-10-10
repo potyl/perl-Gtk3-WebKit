@@ -7,3 +7,7 @@ t/webkit.t
 COPYING
 Changes
 examples/browser.pl
+maps
+webkit-perl.h
+xs/Frame.xs
+xs/WebKit.xs
