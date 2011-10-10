@@ -54,6 +54,11 @@ sub import {
     Glib::Object::Introspection->setup(%args);
 }
 
+# XS stuff
+use base 'DynaLoader';
+__PACKAGE__->bootstrap($VERSION);
+
+
 1;
 
 =head1 BUGS
