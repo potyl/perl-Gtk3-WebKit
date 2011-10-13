@@ -29,7 +29,7 @@ use Data::Dumper;
 sub main {
     my ($url) = shift @ARGV || 'http://search.cpan.org/';
 
-    my $window = Gtk3::Window->new('toplevel');
+    my $window = Gtk3::OffscreenWindow->new('toplevel');
     $window->set_default_size(800, 600);
     $window->signal_connect(destroy => sub { Gtk3->main_quit() });
 
@@ -38,6 +38,9 @@ sub main {
 
     $view->signal_connect('notify::load-status' => sub {
         return unless $view->get_uri and ($view->get_load_status eq 'finished');
+
+        Gtk3->main_quit();
+
         print "Document loaded\n";
         my $frame = $view->get_main_frame();
         print "Frame is $frame\n";
