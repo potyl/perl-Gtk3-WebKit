@@ -2,10 +2,11 @@
 #include <JavaScriptCore/JavaScript.h>
 
 
-const char* get_type (JSGlobalContextRef context, JSValueRef value) {
-    JSType type = JSValueGetType(context, value);
+static
+const char*
+get_type (JSGlobalContextRef context, JSValueRef value) {
 
-    switch (type) {
+    switch (JSValueGetType(context, value)) {
         case kJSTypeUndefined:
             return "undefined";
         case kJSTypeNull:
@@ -22,6 +23,59 @@ const char* get_type (JSGlobalContextRef context, JSValueRef value) {
             return "????";
     }
 }
+
+
+static
+SV*
+js_to_sv (JSGlobalContextRef context, JSValueRef value, gboolean use_globals) {
+    switch (JSValueGetType(context, value)) {
+        case kJSTypeUndefined:
+        case kJSTypeNull:
+            return use_globals ? &PL_sv_undef : newSV(0);
+
+        case kJSTypeBoolean:
+        {
+            gboolean val = JSValueToBoolean(context, value);
+            if (use_globals) {
+                return val ? &PL_sv_yes : &PL_sv_no;
+            }
+            return val ? newSViv(1) : newSV(0);
+        }
+
+        case kJSTypeNumber:
+            return newSVnv(JSValueToNumber(context, value, NULL));
+
+        case kJSTypeString:
+        {
+            JSStringRef js_value;
+
+            js_value = JSValueCreateJSONString(context, value, 0, NULL);
+            if (js_value != NULL) {
+                gint max_size;
+                gchar* str_value;
+                SV *val;
+
+                max_size = JSStringGetMaximumUTF8CStringSize(js_value);
+                str_value = g_malloc(max_size);
+                JSStringGetUTF8CString(js_value, str_value, max_size);
+                JSStringRelease(js_value);
+
+                val = newSVpv(str_value, 0);
+                g_free(str_value);
+                return val;
+            }
+            return use_globals ? &PL_sv_undef : newSV(0);
+        }
+
+        case kJSTypeObject:
+            return newSVpv("{OBJECT}", 0);
+
+        default:
+            return use_globals ? &PL_sv_undef : newSV(0);
+    }
+
+}
+
 
 MODULE = Gtk3::WebKit::WebFrame  PACKAGE = Gtk3::WebKit::WebFrame  PREFIX = webkit_web_frame_
 
@@ -42,34 +96,7 @@ JSEvaluateScript (WebKitWebFrame *frame, char *script, char *url = NULL, int lin
         JSStringRelease(js_script);
         JSStringRelease(js_url);
 
-        printf("value = %p\n", value);
-        printf("type = %s\n", get_type(context, value));
-
-        type = JSValueGetType(context, value);
-        if (type == kJSTypeObject) {
-            RETVAL = newSVpv("{}", 2);
-        }
-        else {
-            JSStringRef js_value;
-            gint max_size;
-            gchar* str_value;
-
-            js_value = JSValueCreateJSONString(context, value, 0, NULL);
-            printf("value = %p\n", js_value);
-            /* printf("type = %s\n", get_type(context, js_value)); */
-            if (js_value != NULL) {
-                max_size = JSStringGetMaximumUTF8CStringSize(js_value);
-                str_value = g_malloc(max_size);
-                JSStringGetUTF8CString(js_value, str_value, max_size);
-                JSStringRelease(js_value);
-
-                RETVAL = newSVpv(str_value, 0);
-                g_free(str_value);
-            }
-            else {
-                RETVAL = &PL_sv_undef;
-            }
-        }
+        RETVAL = js_to_sv(context, value, TRUE);
 
     OUTPUT:
         RETVAL
