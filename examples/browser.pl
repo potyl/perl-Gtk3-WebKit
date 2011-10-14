@@ -45,12 +45,12 @@ sub main {
         my $frame = $view->get_main_frame();
         print "Frame is $frame\n";
         my $json = $frame->JSEvaluateScript(
-            "window.document.getElementsByTagName('title');",
-#            "[ 0, 1, 2 ];",
+#            "window.document.getElementsByTagName('title');",
+            "[ 'a', 'b', 'c' ];",
         );
-        print "JSON: ", Dumper($json);
-        my $data = $json eq '' ? '' : decode_json($json);
-        print "Data: ", Dumper($data);
+        print "GOT: ", Dumper($json);
+        #my $data = $json eq '' ? '' : decode_json($json);
+        #print "Data: ", Dumper($data);
     });
 
     # Load a page

@@ -2,8 +2,7 @@
 #include <JavaScriptCore/JavaScript.h>
 
 
-static
-const char*
+static const char*
 get_type (JSGlobalContextRef context, JSValueRef value) {
 
     switch (JSValueGetType(context, value)) {
@@ -25,8 +24,31 @@ get_type (JSGlobalContextRef context, JSValueRef value) {
 }
 
 
-static
-SV*
+static gchar*
+js_to_str (JSStringRef js_str) {
+    gint size;
+    gchar* str;
+
+    if (js_str == NULL) return NULL;
+
+    size = JSStringGetMaximumUTF8CStringSize(js_str);
+    str = g_malloc(size);
+    JSStringGetUTF8CString(js_str, str, size);
+    JSStringRelease(js_str);
+    return str;
+}
+
+
+static gchar*
+js_to_json (JSGlobalContextRef context, JSValueRef value) {
+    JSStringRef js_value;
+
+    js_value = JSValueCreateJSONString(context, value, 0, NULL);
+    return js_to_str(js_value);
+}
+
+
+static SV*
 js_to_sv (JSGlobalContextRef context, JSValueRef value, gboolean use_globals) {
     switch (JSValueGetType(context, value)) {
         case kJSTypeUndefined:
@@ -51,15 +73,10 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, gboolean use_globals) {
 
             js_value = JSValueCreateJSONString(context, value, 0, NULL);
             if (js_value != NULL) {
-                gint max_size;
                 gchar* str_value;
                 SV *val;
 
-                max_size = JSStringGetMaximumUTF8CStringSize(js_value);
-                str_value = g_malloc(max_size);
-                JSStringGetUTF8CString(js_value, str_value, max_size);
-                JSStringRelease(js_value);
-
+                str_value = js_to_str(js_value);
                 val = newSVpv(str_value, 0);
                 g_free(str_value);
                 return val;
@@ -68,7 +85,32 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, gboolean use_globals) {
         }
 
         case kJSTypeObject:
+        {
+            JSPropertyNameArrayRef properties;
+            JSObjectRef object;
+            size_t count, i;
+
+            object = (JSObjectRef) value;
+            properties = JSObjectCopyPropertyNames(context, object);
+
+            count = JSPropertyNameArrayGetCount(properties);
+            for (i = 0; i < count; ++i) {
+                JSStringRef js_name;
+                JSValueRef js_value;
+                gchar *name, *value;
+
+                js_name = JSPropertyNameArrayGetNameAtIndex(properties, i);
+                js_value = JSObjectGetProperty(context, object, js_name, NULL);
+
+                name = js_to_str(js_name);
+                value = js_to_json(context, js_value);
+                printf("[%2d] Property: %s => %s\n", i, name, value);
+                g_free(name);
+                g_free(value);
+            }
+
             return newSVpv("{OBJECT}", 0);
+        }
 
         default:
             return use_globals ? &PL_sv_undef : newSV(0);
