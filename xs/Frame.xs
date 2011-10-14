@@ -34,7 +34,6 @@ js_to_str (JSStringRef js_str) {
     size = JSStringGetMaximumUTF8CStringSize(js_str);
     str = g_malloc(size);
     JSStringGetUTF8CString(js_str, str, size);
-    JSStringRelease(js_str);
     return str;
 }
 
@@ -42,9 +41,13 @@ js_to_str (JSStringRef js_str) {
 static gchar*
 js_to_json (JSGlobalContextRef context, JSValueRef value) {
     JSStringRef js_value;
+    gchar *str;
 
     js_value = JSValueCreateJSONString(context, value, 0, NULL);
-    return js_to_str(js_value);
+    str = js_to_str(js_value);
+    JSStringRelease(js_value);
+
+    return str;
 }
 
 
@@ -83,6 +86,7 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, gboolean use_globals) {
                 SV *val;
 
                 str_value = js_to_str(js_value);
+                JSStringRelease(js_value);
                 val = newSVpv(str_value, 0);
                 g_free(str_value);
                 return val;
@@ -98,24 +102,33 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, gboolean use_globals) {
             JSValueRef js_prototype;
             gchar *prototype;
             gboolean is_array;
+            AV *av;
+            HV *hv;
 
             object = JSValueToObject(context, value, NULL);
-    if (object) {
             properties = JSObjectCopyPropertyNames(context, object);
 
             js_prototype = JSObjectGetPrototype(context, object);
             prototype = js_to_json(context, js_prototype);
             printf("Prototype =  %s\n", prototype);
-            is_array = strcmp(prototype, "[]") == 0;
+            if (strcmp(prototype, "[]") == 0) {
+                is_array = TRUE;
+                av = newAV();
+            }
+            else {
+                is_array = FALSE;
+                hv = newHV();
+            }
             g_free(prototype);
-    }
-    if (properties) {
+
+
             printf("Build: %s\n", is_array ? "ARRAY" : "HASH");
             count = JSPropertyNameArrayGetCount(properties);
             for (i = 0; i < count; ++i) {
                 JSStringRef js_name;
                 JSValueRef js_value;
                 gchar *name, *value;
+                SV *sv;
 
                 js_name = JSPropertyNameArrayGetNameAtIndex(properties, i);
                 js_value = JSObjectGetProperty(context, object, js_name, NULL);
@@ -127,14 +140,34 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, gboolean use_globals) {
                     }
                 }
 
+
                 name = js_to_str(js_name);
                 value = js_to_json(context, js_value);
                 printf("[%2d] Property: %s => %s\n", i, name, value);
                 g_free(name);
                 g_free(value);
+
+                /* FIXME handle circular references */
+                sv = js_to_sv(context, js_value, FALSE);
+                if (is_array) {
+                    /* push into the array */
+                    av_push(av, sv);
+            JSStringRelease(js_name);
+                }
+                else {
+                    /* get the key, value */
+                    gchar *key;
+                    U32 klen;
+
+                    key = js_to_str(js_name);
+                    JSStringRelease(js_name);
+                    klen = strlen(key);
+                    hv_store(hv, key, klen, sv, 0);
+                    g_free(key);
+                }
             }
-    }
-            return newSVpv("{OBJECT}", 0);
+
+            return newRV_inc((SV*) (is_array ? av : hv));/* newSVpv("{OBJECT}", 0); */
         }
 
         default:
