@@ -45,8 +45,9 @@ sub main {
         my $frame = $view->get_main_frame();
         print "Frame is $frame\n";
         my $json = $frame->JSEvaluateScript(
-#            "window.document.getElementsByTagName('title');",
-            "[ 'a', 'b', 'c' ];",
+            q{ window.document.getElementsByTagName('title'); },
+#            "[ 'a', 'b', 'c' ];",
+#            q({'one': 22};),
         );
         print "GOT: ", Dumper($json);
         #my $data = $json eq '' ? '' : decode_json($json);

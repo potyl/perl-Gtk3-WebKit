@@ -50,6 +50,12 @@ js_to_json (JSGlobalContextRef context, JSValueRef value) {
 
 static SV*
 js_to_sv (JSGlobalContextRef context, JSValueRef value, gboolean use_globals) {
+
+    printf("Value is %p\n", value);
+    if (value == NULL) {
+        return use_globals ? &PL_sv_undef : newSV(0);
+    }
+
     switch (JSValueGetType(context, value)) {
         case kJSTypeUndefined:
         case kJSTypeNull:
@@ -86,13 +92,25 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, gboolean use_globals) {
 
         case kJSTypeObject:
         {
-            JSPropertyNameArrayRef properties;
+            JSPropertyNameArrayRef properties = NULL;
             JSObjectRef object;
             size_t count, i;
+            JSValueRef js_prototype;
+            gchar *prototype;
+            gboolean is_array;
 
-            object = (JSObjectRef) value;
+            object = JSValueToObject(context, value, NULL);
+    if (object) {
             properties = JSObjectCopyPropertyNames(context, object);
 
+            js_prototype = JSObjectGetPrototype(context, object);
+            prototype = js_to_json(context, js_prototype);
+            printf("Prototype =  %s\n", prototype);
+            is_array = strcmp(prototype, "[]") == 0;
+            g_free(prototype);
+    }
+    if (properties) {
+            printf("Build: %s\n", is_array ? "ARRAY" : "HASH");
             count = JSPropertyNameArrayGetCount(properties);
             for (i = 0; i < count; ++i) {
                 JSStringRef js_name;
@@ -102,13 +120,20 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, gboolean use_globals) {
                 js_name = JSPropertyNameArrayGetNameAtIndex(properties, i);
                 js_value = JSObjectGetProperty(context, object, js_name, NULL);
 
+                if (JSValueIsObject(context, js_value)) {
+                    JSObjectRef js_object = JSValueToObject(context, js_value, NULL);
+                     if (JSObjectIsFunction(context, js_object) || JSObjectIsConstructor(context, js_object)) {
+                        continue;
+                    }
+                }
+
                 name = js_to_str(js_name);
                 value = js_to_json(context, js_value);
                 printf("[%2d] Property: %s => %s\n", i, name, value);
                 g_free(name);
                 g_free(value);
             }
-
+    }
             return newSVpv("{OBJECT}", 0);
         }
 
