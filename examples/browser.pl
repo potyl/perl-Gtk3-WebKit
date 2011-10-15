@@ -56,6 +56,7 @@ sub main {
                     [ 'abcd', array, 'efgh', ],
                 ];
 
+                window.document.getElementsByTagName('title');
             },
 #            q({'one': 22};),
         );
