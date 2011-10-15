@@ -57,7 +57,6 @@ js_to_json (JSGlobalContextRef context, JSValueRef value) {
 static SV*
 js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboolean use_globals) {
 
-    printf("Value is %p\n", value);
     if (value == NULL) {
         return use_globals ? &PL_sv_undef : newSV(0);
     }
@@ -123,7 +122,6 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
 
             js_prototype = JSObjectGetPrototype(context, object);
             prototype = js_to_json(context, js_prototype);
-            printf("Prototype =  %s\n", prototype);
             if (strcmp(prototype, "[]") == 0) {
                 is_array = TRUE;
                 av = newAV();
@@ -135,7 +133,6 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
             g_free(prototype);
 
 
-            printf("Build: %s\n", is_array ? "ARRAY" : "HASH");
             count = JSPropertyNameArrayGetCount(properties);
             for (i = 0; i < count; ++i) {
                 JSStringRef js_name;
@@ -157,6 +154,7 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
                 name = js_to_str(js_name);
                 value = js_to_json(context, js_value);
                 printf("[%2d] Property: %s => %s\n", i, name, value);
+                fflush(stdout);
                 g_free(name);
                 g_free(value);
 
