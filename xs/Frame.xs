@@ -168,7 +168,7 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, gboolean use_globals) {
                 }
             }
 
-            return newRV_inc((SV*) (is_array ? av : hv));
+            return newRV_inc((is_array ? (SV*) av : (SV*) hv));
         }
 
         default:
