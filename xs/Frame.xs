@@ -44,6 +44,9 @@ js_to_json (JSGlobalContextRef context, JSValueRef value) {
     gchar *str;
 
     js_value = JSValueCreateJSONString(context, value, 0, NULL);
+    if (js_value == NULL) {
+        return NULL;
+    }
     str = js_to_str(js_value);
     JSStringRelease(js_value);
 
