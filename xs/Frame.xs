@@ -52,7 +52,7 @@ js_to_json (JSGlobalContextRef context, JSValueRef value) {
 
 
 static SV*
-js_to_sv (JSGlobalContextRef context, JSValueRef value, gboolean use_globals) {
+js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboolean use_globals) {
 
     printf("Value is %p\n", value);
     if (value == NULL) {
@@ -105,6 +105,15 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, gboolean use_globals) {
             gboolean is_array;
             AV *av;
             HV *hv;
+            SV *sv;
+
+            /* Handle circular references by returning the SV that matches the
+               JS object.
+             */
+            sv = g_hash_table_lookup(g_hash, value);
+            if (sv != NULL) {
+                return sv;
+            }
 
             object = JSValueToObject(context, value, NULL);
             properties = JSObjectCopyPropertyNames(context, object);
@@ -148,8 +157,7 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, gboolean use_globals) {
                 g_free(name);
                 g_free(value);
 
-                /* FIXME handle circular references */
-                sv = js_to_sv(context, js_value, FALSE);
+                sv = js_to_sv(context, js_value, g_hash, FALSE);
                 if (is_array) {
                     /* push into the array */
                     av_push(av, sv);
@@ -168,7 +176,11 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, gboolean use_globals) {
                 }
             }
 
-            return newRV_inc((is_array ? (SV*) av : (SV*) hv));
+
+            /* Remember the reference in case that we will see it once more */
+            sv = newRV_inc((is_array ? (SV*) av : (SV*) hv));
+            g_hash_table_insert(g_hash, value, sv);
+            return sv;
         }
 
         default:
@@ -188,6 +200,7 @@ JSEvaluateScript (WebKitWebFrame *frame, char *script, char *url = NULL, int lin
         JSStringRef js_script, js_url;
         JSValueRef value;
         JSType type;
+        GHashTable *g_hash;
 
         context = webkit_web_frame_get_global_context(frame);
 
@@ -197,7 +210,9 @@ JSEvaluateScript (WebKitWebFrame *frame, char *script, char *url = NULL, int lin
         JSStringRelease(js_script);
         JSStringRelease(js_url);
 
-        RETVAL = js_to_sv(context, value, TRUE);
+        g_hash = g_hash_table_new(g_direct_hash, g_direct_equal);
+        RETVAL = js_to_sv(context, value, g_hash, TRUE);
+        g_hash_table_unref(g_hash);
 
     OUTPUT:
         RETVAL
