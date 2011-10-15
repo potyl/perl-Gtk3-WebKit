@@ -182,7 +182,7 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
 
             /* Remember the reference in case that we will see it once more */
             sv = newRV_inc((is_array ? (SV*) av : (SV*) hv));
-            g_hash_table_insert(g_hash, value, sv);
+            g_hash_table_insert(g_hash, (gpointer)value, (gpointer) sv);
             return sv;
         }
 
