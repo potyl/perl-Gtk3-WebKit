@@ -125,12 +125,17 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
             if (strcmp(prototype, "[]") == 0) {
                 is_array = TRUE;
                 av = newAV();
+                sv = newRV_inc((SV *) av);
             }
             else {
                 is_array = FALSE;
                 hv = newHV();
+                sv = newRV_inc((SV *) hv);
             }
             g_free(prototype);
+
+            /* Remember the reference in case that we will see it once more */
+            g_hash_table_insert(g_hash, (gpointer)value, (gpointer) sv);
 
 
             count = JSPropertyNameArrayGetCount(properties);
@@ -177,10 +182,6 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
                 }
             }
 
-
-            /* Remember the reference in case that we will see it once more */
-            sv = newRV_inc((is_array ? (SV*) av : (SV*) hv));
-            g_hash_table_insert(g_hash, (gpointer)value, (gpointer) sv);
             return sv;
         }
 
