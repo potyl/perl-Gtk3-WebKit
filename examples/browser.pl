@@ -47,10 +47,15 @@ sub main {
         my $json = $frame->JSEvaluateScript(
 #            q{ window.document.getElementsByTagName('title'); },
             q{
+                var array = [ 2, 4, 8, ];
+
                 [
                     'a', 'b', 'c',
+                    [ 9, 8, 7, [ array ] ],
                     [ 10, 20, 30, ],
+                    [ 'abcd', array, 'efgh', ],
                 ];
+
             },
 #            q({'one': 22};),
         );
