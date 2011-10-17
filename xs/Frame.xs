@@ -179,12 +179,10 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
 
                 sv = js_to_sv(context, jv_value, g_hash, FALSE, is_dom_ancestor || is_dom);
                 if (is_array) {
-                    /* push into the array */
                     av_push(av, sv);
                     JSStringRelease(js_name);
                 }
                 else {
-                    /* get the key, value */
                     gchar *key;
                     U32 klen;
 
