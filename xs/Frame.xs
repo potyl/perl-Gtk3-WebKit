@@ -162,21 +162,22 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
             count = JSPropertyNameArrayGetCount(properties);
             for (i = 0; i < count; ++i) {
                 JSStringRef js_name;
-                JSValueRef js_value;
+                JSValueRef jv_value;
                 gchar *name, *value;
                 SV *sv;
 
                 js_name = JSPropertyNameArrayGetNameAtIndex(properties, i);
-                js_value = JSObjectGetProperty(context, object, js_name, NULL);
+                jv_value = JSObjectGetProperty(context, object, js_name, NULL);
 
-                if (JSValueIsObject(context, js_value)) {
-                    JSObjectRef js_object = JSValueToObject(context, js_value, NULL);
-                     if (JSObjectIsFunction(context, js_object) || JSObjectIsConstructor(context, js_object)) {
+                if (JSValueIsObject(context, jv_value)) {
+                    JSObjectRef jo_object = JSValueToObject(context, jv_value, NULL);
+                     if (JSObjectIsFunction(context, jo_object) || JSObjectIsConstructor(context, jo_object)) {
+                        JSStringRelease(js_name);
                         continue;
                     }
                 }
 
-                sv = js_to_sv(context, js_value, g_hash, FALSE, is_dom_ancestor || is_dom);
+                sv = js_to_sv(context, jv_value, g_hash, FALSE, is_dom_ancestor || is_dom);
                 if (is_array) {
                     /* push into the array */
                     av_push(av, sv);
