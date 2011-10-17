@@ -176,13 +176,6 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
                     }
                 }
 
-                name = js_to_str(js_name);
-                value = js_to_json(context, js_value);
-                if (0) printf("[%2d] Property: %s => %s\n", i, name, value);
-                fflush(stdout);
-                g_free(name);
-                g_free(value);
-
                 sv = js_to_sv(context, js_value, g_hash, FALSE, is_dom_ancestor || is_dom);
                 if (is_array) {
                     /* push into the array */
