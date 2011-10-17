@@ -64,7 +64,7 @@ js_is_dom (JSGlobalContextRef context, JSValueRef value) {
 
 
 static SV*
-js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboolean use_globals) {
+js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboolean use_globals, gboolean is_dom_ancestor) {
 
     if (value == NULL) {
         return use_globals ? &PL_sv_undef : newSV(0);
@@ -119,20 +119,26 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
             SV *sv;
             gboolean is_dom;
 
+            is_dom = js_is_dom(context, value);
+
+            if (is_dom_ancestor && is_dom) {
+                /* Dumping a real DOM element is problematic because it causes
+                   the program to crash if we doit all with recursion. There's
+                   some weird stuff in the DOM that should not be serialized
+                   back into a SV. What we do instead is to limit the DOM
+                   recursion to 1 single node.
+                 */
+                sv = newSV(0);
+                g_hash_table_insert(g_hash, (gpointer)value, (gpointer) sv);
+                return sv;
+            }
+
+
             /* Handle circular references by returning the SV that matches the
                JS object.
              */
             sv = g_hash_table_lookup(g_hash, value);
             if (sv != NULL) {return sv;}
-
-            if (!use_globals) {
-                is_dom = js_is_dom(context, value);
-                 /* Dumping a real DOM element is problematic because it causes
-                    the program to crash. There's some weird stuff in the DOM
-                    that should not be serialized back into a SV.
-                  */
-                if (is_dom) return newSV(0);
-            }
 
             object = JSValueToObject(context, value, NULL);
             properties = JSObjectCopyPropertyNames(context, object);
@@ -178,7 +184,7 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
                 g_free(name);
                 g_free(value);
 
-                sv = js_to_sv(context, js_value, g_hash, FALSE);
+                sv = js_to_sv(context, js_value, g_hash, FALSE, is_dom_ancestor || is_dom);
                 if (is_array) {
                     /* push into the array */
                     av_push(av, sv);
@@ -228,7 +234,7 @@ JSEvaluateScript (WebKitWebFrame *frame, char *script, char *url = NULL, int lin
 
         g_hash = g_hash_table_new(g_direct_hash, g_direct_equal);
         printf("Building Perl tree\n");
-        RETVAL = js_to_sv(context, value, g_hash, TRUE);
+        RETVAL = js_to_sv(context, value, g_hash, TRUE, FALSE);
         printf("Perl tree is built\n");
         g_hash_table_unref(g_hash);
 
