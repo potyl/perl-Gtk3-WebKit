@@ -3,7 +3,7 @@
 
 
 static const char*
-get_type (JSGlobalContextRef context, JSValueRef value) {
+js_get_type (JSGlobalContextRef context, JSValueRef value) {
 
     switch (JSValueGetType(context, value)) {
         case kJSTypeUndefined:
@@ -51,6 +51,15 @@ js_to_json (JSGlobalContextRef context, JSValueRef value) {
     JSStringRelease(js_value);
 
     return str;
+}
+
+
+static gboolean
+js_is_dom (JSGlobalContextRef context, JSValueRef value) {
+    JSStringRef js_constructor = JSStringCreateWithUTF8CString("Node");
+    JSObjectRef constructor = JSValueToObject(context, JSObjectGetProperty(context, JSContextGetGlobalObject(context), js_constructor, NULL), NULL);
+    JSStringRelease(js_constructor);
+    return JSValueIsInstanceOfConstructor(context, value, constructor, NULL);
 }
 
 
@@ -108,13 +117,21 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
             AV *av;
             HV *hv;
             SV *sv;
+            gboolean is_dom;
 
             /* Handle circular references by returning the SV that matches the
                JS object.
              */
             sv = g_hash_table_lookup(g_hash, value);
-            if (sv != NULL) {
-                return sv;
+            if (sv != NULL) {return sv;}
+
+            if (!use_globals) {
+                is_dom = js_is_dom(context, value);
+                 /* Dumping a real DOM element is problematic because it causes
+                    the program to crash. There's some weird stuff in the DOM
+                    that should not be serialized back into a SV.
+                  */
+                if (is_dom) return newSV(0);
             }
 
             object = JSValueToObject(context, value, NULL);
@@ -137,7 +154,6 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
             /* Remember the reference in case that we will see it once more */
             g_hash_table_insert(g_hash, (gpointer)value, (gpointer) sv);
 
-
             count = JSPropertyNameArrayGetCount(properties);
             for (i = 0; i < count; ++i) {
                 JSStringRef js_name;
@@ -155,10 +171,9 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
                     }
                 }
 
-
                 name = js_to_str(js_name);
                 value = js_to_json(context, js_value);
-                printf("[%2d] Property: %s => %s\n", i, name, value);
+                if (0) printf("[%2d] Property: %s => %s\n", i, name, value);
                 fflush(stdout);
                 g_free(name);
                 g_free(value);
@@ -188,7 +203,6 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
         default:
             return use_globals ? &PL_sv_undef : newSV(0);
     }
-
 }
 
 
@@ -213,7 +227,9 @@ JSEvaluateScript (WebKitWebFrame *frame, char *script, char *url = NULL, int lin
         JSStringRelease(js_url);
 
         g_hash = g_hash_table_new(g_direct_hash, g_direct_equal);
+        printf("Building Perl tree\n");
         RETVAL = js_to_sv(context, value, g_hash, TRUE);
+        printf("Perl tree is built\n");
         g_hash_table_unref(g_hash);
 
     OUTPUT:
