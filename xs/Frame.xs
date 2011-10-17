@@ -90,20 +90,19 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
         case kJSTypeString:
         {
             JSStringRef js_value;
-            gchar *str_value;
-            SV *val;
+            gchar *str;
+            SV *sv;
 
             js_value = JSValueToStringCopy(context, value, NULL);
             if (js_value == NULL) {
                 return use_globals ? &PL_sv_undef : newSV(0);
             }
 
-
-            str_value = js_to_str(js_value);
+            str = js_to_str(js_value);
             JSStringRelease(js_value);
-            val = newSVpv(str_value, 0);
-            g_free(str_value);
-            return val;
+            sv = newSVpv(str, 0);
+            g_free(str);
+            return sv;
         }
 
         case kJSTypeObject:
