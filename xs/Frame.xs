@@ -119,7 +119,6 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
             gboolean is_dom;
 
             is_dom = js_is_dom(context, value);
-
             if (is_dom_ancestor && is_dom) {
                 /* Dumping a real DOM element is problematic because it causes
                    the program to crash if we doit all with recursion. There's
@@ -193,6 +192,9 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
                     g_free(key);
                 }
             }
+            /* This breaks the program:
+                  JSPropertyNameArrayRelease(properties);
+             */
 
             return sv;
         }
