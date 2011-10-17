@@ -157,7 +157,7 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
             g_free(prototype);
 
             /* Remember the reference in case that we will see it once more */
-            g_hash_table_insert(g_hash, (gpointer)value, (gpointer) sv);
+            g_hash_table_insert(g_hash, (gpointer) value, (gpointer) sv);
 
             count = JSPropertyNameArrayGetCount(properties);
             for (i = 0; i < count; ++i) {
