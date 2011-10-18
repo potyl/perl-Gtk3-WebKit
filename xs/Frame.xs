@@ -109,7 +109,7 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
             JSPropertyNameArrayRef properties = NULL;
             JSObjectRef object;
             size_t count, i;
-            JSValueRef js_prototype;
+            JSValueRef jv_prototype;
             gchar *prototype;
             gboolean is_array;
             AV *av;
@@ -140,8 +140,8 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
             object = JSValueToObject(context, value, NULL);
             properties = JSObjectCopyPropertyNames(context, object);
 
-            js_prototype = JSObjectGetPrototype(context, object);
-            prototype = js_to_json(context, js_prototype);
+            jv_prototype = JSObjectGetPrototype(context, object);
+            prototype = js_to_json(context, jv_prototype);
             if (strcmp(prototype, "[]") == 0) {
                 is_array = TRUE;
                 av = newAV();
