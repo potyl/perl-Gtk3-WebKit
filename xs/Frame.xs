@@ -48,7 +48,6 @@ js_to_json (JSGlobalContextRef context, JSValueRef value) {
         return NULL;
     }
     str = js_to_str(js_value);
-    JSStringRelease(js_value);
 
     return str;
 }
@@ -66,7 +65,7 @@ js_is_dom (JSGlobalContextRef context, JSValueRef value) {
 static SV*
 js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboolean use_globals, gboolean is_dom_ancestor) {
 
-    if (value == NULL) {
+    if (value == NULL || JSValueIsUndefined(context, value) || JSValueIsNull(context, value)) {
         return use_globals ? &PL_sv_undef : newSV(0);
     }
 
@@ -127,7 +126,7 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
                    recursion to 1 single node.
                  */
                 sv = newSV(0);
-                g_hash_table_insert(g_hash, (gpointer)value, (gpointer) sv);
+                g_hash_table_insert(g_hash, (gpointer) value, (gpointer) sv);
                 return sv;
             }
 
@@ -162,7 +161,6 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
             for (i = 0; i < count; ++i) {
                 JSStringRef js_name;
                 JSValueRef jv_value;
-                gchar *name, *value;
                 SV *sv;
 
                 js_name = JSPropertyNameArrayGetNameAtIndex(properties, i);
@@ -171,7 +169,6 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
                 if (JSValueIsObject(context, jv_value)) {
                     JSObjectRef jo_object = JSValueToObject(context, jv_value, NULL);
                      if (JSObjectIsFunction(context, jo_object) || JSObjectIsConstructor(context, jo_object)) {
-                        JSStringRelease(js_name);
                         continue;
                     }
                 }
@@ -179,22 +176,18 @@ js_to_sv (JSGlobalContextRef context, JSValueRef value, GHashTable *g_hash, gboo
                 sv = js_to_sv(context, jv_value, g_hash, FALSE, is_dom_ancestor || is_dom);
                 if (is_array) {
                     av_push(av, sv);
-                    JSStringRelease(js_name);
                 }
                 else {
                     gchar *key;
                     U32 klen;
 
                     key = js_to_str(js_name);
-                    JSStringRelease(js_name);
                     klen = strlen(key);
                     hv_store(hv, key, klen, sv, 0);
                     g_free(key);
                 }
             }
-            /* This breaks the program:
-                  JSPropertyNameArrayRelease(properties);
-             */
+            JSPropertyNameArrayRelease(properties);
 
             return sv;
         }
