@@ -40,8 +40,8 @@ use strict;
 
 use Glib::Object::Introspection;
 
+our $VERSION = '0.02';
 
-our $VERSION = '0.01';
 
 
 sub import {
