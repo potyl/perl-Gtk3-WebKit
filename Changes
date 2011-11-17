@@ -1,4 +1,7 @@
 Revision history for Gtk3::WebKit
 
+0.02 Thu Nov 17 12:27:01 CET 2011
+    Add DOM constants
+
 0.01 Mon Sep 19 21:37:15 CEST 2011
-	First version, released on an unsuspecting world.
+    First version, released on an unsuspecting world.
