@@ -143,6 +143,69 @@ use constant {
     # INVALID_NODE_TYPE_ERR is currently unused but was added for completeness.
     INVALID_NODE_TYPE_ERR          =>24,
     DATA_CLONE_ERR                 =>25,
+
+    # EventExceptionCode
+    UNSPECIFIED_EVENT_TYPE_ERR => 0,
+    DISPATCH_REQUEST_ERR       => 1,
+
+    # KeyLocationCode
+    KEY_LOCATION_STANDARD      => 0x00,
+    KEY_LOCATION_LEFT          => 0x01,
+    KEY_LOCATION_RIGHT         => 0x02,
+    KEY_LOCATION_NUMPAD        => 0x03,
+
+
+    # Range compare how
+    START_TO_START => 0,
+    START_TO_END   => 1,
+    END_TO_END     => 2,
+    END_TO_START   => 3,
+
+    # Range compare results
+    NODE_BEFORE           => 0,
+    NODE_AFTER            => 1,
+    NODE_BEFORE_AND_AFTER => 2,
+    NODE_INSIDE           => 3,
+
+    # Range exceptions
+    BAD_BOUNDARYPOINTS_ERR => 1,
+    INVALID_NODE_TYPE_ERR  => 2,
+
+    # Overflow event
+    HORIZONTAL => 0,
+    VERTICAL   => 1,
+    BOTH       => 2,
+
+    # NodeFilter acceptNode return values
+    FILTER_ACCEPT                  => 1,
+    FILTER_REJECT                  => 2,
+    FILTER_SKIP                    => 3,
+
+    # NodeFilter whatToShow
+    SHOW_ALL                       => 0xFFFFFFFF,
+    SHOW_ELEMENT                   => 0x00000001,
+    SHOW_ATTRIBUTE                 => 0x00000002,
+    SHOW_TEXT                      => 0x00000004,
+    SHOW_CDATA_SECTION             => 0x00000008,
+    SHOW_ENTITY_REFERENCE          => 0x00000010,
+    SHOW_ENTITY                    => 0x00000020,
+    SHOW_PROCESSING_INSTRUCTION    => 0x00000040,
+    SHOW_COMMENT                   => 0x00000080,
+    SHOW_DOCUMENT                  => 0x00000100,
+    SHOW_DOCUMENT_TYPE             => 0x00000200,
+    SHOW_DOCUMENT_FRAGMENT         => 0x00000400,
+    SHOW_NOTATION                  => 0x00000800,
+
+
+    # Attr change types
+    MODIFICATION =>1,
+    ADDITION     =>2,
+    REMOVAL      =>3,
+
+
+    # Media stream
+    LIVE  => 1,
+    ENDED => 2,
 };
 
 # export nothing by default.
@@ -240,6 +303,76 @@ our %EXPORT_TAGS = (
         TIMEOUT_ERR
         INVALID_NODE_TYPE_ERR
         DATA_CLONE_ERR
+    }],
+
+    event_exception_codes => [qw{
+        UNSPECIFIED_EVENT_TYPE_ERR
+        DISPATCH_REQUEST_ERR
+    }],
+
+    key_location_codes => [qw{
+        KEY_LOCATION_STANDARD
+        KEY_LOCATION_LEFT
+        KEY_LOCATION_RIGHT
+        KEY_LOCATION_NUMPAD
+    }],
+
+    range_compare_how => [qw{
+        START_TO_START
+        START_TO_END
+        END_TO_END
+        END_TO_START
+    }],
+
+    range_compare_results => [qw{
+        NODE_BEFORE
+        NODE_AFTER
+        NODE_BEFORE_AND_AFTER
+        NODE_INSIDE
+    }],
+
+    range_exceptions => [qw{
+        BAD_BOUNDARYPOINTS_ERR
+        INVALID_NODE_TYPE_ERR
+    }],
+
+
+    # Overflow event
+    overflow_event => [qw{
+        HORIZONTAL
+        VERTICAL
+        BOTH
+    }],
+
+    node_filter => [qw{
+        FILTER_ACCEPT
+        FILTER_REJECT
+        FILTER_SKIP
+
+        SHOW_ALL
+        SHOW_ELEMENT
+        SHOW_ATTRIBUTE
+        SHOW_TEXT
+        SHOW_CDATA_SECTION
+        SHOW_ENTITY_REFERENCE
+        SHOW_ENTITY
+        SHOW_PROCESSING_INSTRUCTION
+        SHOW_COMMENT
+        SHOW_DOCUMENT
+        SHOW_DOCUMENT_TYPE
+        SHOW_DOCUMENT_FRAGMENT
+        SHOW_NOTATION
+    }],
+
+    attr_change_types => [qw{
+        MODIFICATION
+        ADDITION
+        REMOVAL
+    }],
+
+    media_stream => [qw{
+        LIVE
+        ENDED
     }],
 );
 our @EXPORT_OK = map { @$_ } values %EXPORT_TAGS;
