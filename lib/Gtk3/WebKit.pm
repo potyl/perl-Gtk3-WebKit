@@ -78,6 +78,71 @@ use constant {
     DOCUMENT_POSITION_CONTAINS     => 0x08,
     DOCUMENT_POSITION_CONTAINED_BY => 0x10,
     DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC => 0x20,
+
+    # Event - DOM PhaseType
+    CAPTURING_PHASE     =>1,
+    AT_TARGET           =>2,
+    BUBBLING_PHASE      =>3,
+
+    # Event - Reverse-engineered from Netscape
+    MOUSEDOWN           =>1,
+    MOUSEUP             =>2,
+    MOUSEOVER           =>4,
+    MOUSEOUT            =>8,
+    MOUSEMOVE           =>16,
+    MOUSEDRAG           =>32,
+    CLICK               =>64,
+    DBLCLICK            =>128,
+    KEYDOWN             =>256,
+    KEYUP               =>512,
+    KEYPRESS            =>1024,
+    DRAGDROP            =>2048,
+    FOCUS               =>4096,
+    BLUR                =>8192,
+    SELECT              =>16384,
+    CHANGE              =>32768,
+
+    # Full screen api
+    ALLOW_KEYBOARD_INPUT => 1,
+
+
+    # ExceptionCode
+    INDEX_SIZE_ERR                 =>1,
+    DOMSTRING_SIZE_ERR             =>2,
+    HIERARCHY_REQUEST_ERR          =>3,
+    WRONG_DOCUMENT_ERR             =>4,
+    INVALID_CHARACTER_ERR          =>5,
+    NO_DATA_ALLOWED_ERR            =>6,
+    NO_MODIFICATION_ALLOWED_ERR    =>7,
+    NOT_FOUND_ERR                  =>8,
+    NOT_SUPPORTED_ERR              =>9,
+    INUSE_ATTRIBUTE_ERR            =>10,
+    # Introduced in DOM Level 2:
+    INVALID_STATE_ERR              =>11,
+    # Introduced in DOM Level 2:
+    SYNTAX_ERR                     =>12,
+    # Introduced in DOM Level 2:
+    INVALID_MODIFICATION_ERR       =>13,
+    # Introduced in DOM Level 2:
+    NAMESPACE_ERR                  =>14,
+    # Introduced in DOM Level 2:
+    INVALID_ACCESS_ERR             =>15,
+    # Introduced in DOM Level 3:
+    VALIDATION_ERR                 =>16,
+    # Introduced in DOM Level 3:
+    TYPE_MISMATCH_ERR              =>17,
+    # Introduced as an XHR extension:
+    SECURITY_ERR                   =>18,
+    # Introduced in HTML5:
+    NETWORK_ERR                    =>19,
+    ABORT_ERR                      =>20,
+    URL_MISMATCH_ERR               =>21,
+    QUOTA_EXCEEDED_ERR             =>22,
+    # TIMEOUT_ERR is currently unused but was added for completeness.
+    TIMEOUT_ERR                    =>23,
+    # INVALID_NODE_TYPE_ERR is currently unused but was added for completeness.
+    INVALID_NODE_TYPE_ERR          =>24,
+    DATA_CLONE_ERR                 =>25,
 };
 
 # export nothing by default.
@@ -118,6 +183,63 @@ our %EXPORT_TAGS = (
         DOCUMENT_POSITION_CONTAINS
         DOCUMENT_POSITION_CONTAINED_BY
         DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
+    }],
+
+    event_phase_types => [qw{
+        CAPTURING_PHASE
+        AT_TARGET
+        BUBBLING_PHASE
+    }],
+
+    event_types => [qw{
+        MOUSEDOWN
+        MOUSEUP
+        MOUSEOVER
+        MOUSEOUT
+        MOUSEMOVE
+        MOUSEDRAG
+        CLICK
+        DBLCLICK
+        KEYDOWN
+        KEYUP
+        KEYPRESS
+        DRAGDROP
+        FOCUS
+        BLUR
+        SELECT
+        CHANGE
+    }],
+
+    full_screen_api => [qw{
+        ALLOW_KEYBOARD_INPUT
+    }],
+
+    dom_core_exceptions => [qw{
+        INDEX_SIZE_ERR
+        DOMSTRING_SIZE_ERR
+        HIERARCHY_REQUEST_ERR
+        WRONG_DOCUMENT_ERR
+        INVALID_CHARACTER_ERR
+        NO_DATA_ALLOWED_ERR
+        NO_MODIFICATION_ALLOWED_ERR
+        NOT_FOUND_ERR
+        NOT_SUPPORTED_ERR
+        INUSE_ATTRIBUTE_ERR
+        INVALID_STATE_ERR
+        SYNTAX_ERR
+        INVALID_MODIFICATION_ERR
+        NAMESPACE_ERR
+        INVALID_ACCESS_ERR
+        VALIDATION_ERR
+        TYPE_MISMATCH_ERR
+        SECURITY_ERR
+        NETWORK_ERR
+        ABORT_ERR
+        URL_MISMATCH_ERR
+        QUOTA_EXCEEDED_ERR
+        TIMEOUT_ERR
+        INVALID_NODE_TYPE_ERR
+        DATA_CLONE_ERR
     }],
 );
 our @EXPORT_OK = map { @$_ } values %EXPORT_TAGS;
