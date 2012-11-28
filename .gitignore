@@ -5,3 +5,4 @@ pm_to_blib
 Gtk3-WebKit-*.tar.gz
 MYMETA.json
 MYMETA.yml
+Gtk3-WebKit-*/
