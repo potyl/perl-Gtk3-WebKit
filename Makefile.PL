@@ -3,7 +3,6 @@ use warnings;
 
 use ExtUtils::MakeMaker;
 
-use Cwd;
 use File::Spec;
 use Data::Dumper;
 
