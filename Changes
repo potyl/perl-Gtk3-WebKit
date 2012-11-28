@@ -1,5 +1,8 @@
 Revision history for Gtk3::WebKit
 
+0.03 Wed Nov 28 08:30:51 CET 2012
+    Add Gtk3 as a dependency
+
 0.02 Thu Nov 17 12:27:01 CET 2011
     Add DOM constants
 
