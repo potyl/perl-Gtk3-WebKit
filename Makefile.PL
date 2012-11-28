@@ -19,6 +19,7 @@ sub main {
 
 		PREREQ_PM     => {
 			'Glib::Object::Introspection' => 0,
+			'Gtk3'                        => 0,
 		},
 		PREREQ_FATAL  => 1,
 
