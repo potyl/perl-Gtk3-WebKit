@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 
+use Test::NeedsDisplay;
 use Test::More 'no_plan';
 use Data::Dumper;
 

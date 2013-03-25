@@ -3,6 +3,7 @@ use warnings;
 
 use ExtUtils::MakeMaker;
 
+use Test::NeedsDisplay;
 use File::Spec;
 use Data::Dumper;
 
