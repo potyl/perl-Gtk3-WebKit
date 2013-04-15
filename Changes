@@ -1,5 +1,9 @@
 Revision history for Gtk3::WebKit
 
+0.04 Mon Apr 15 22:13:50 CEST 2013
+    Tests don't fail on a headless system
+    MYMETA files are no longer in the bundle
+
 0.03 Wed Nov 28 08:30:51 CET 2012
     Add Gtk3 as a dependency
 
