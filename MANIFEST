@@ -2,8 +2,6 @@ lib/Gtk3/WebKit.pm
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
-MYMETA.json
-MYMETA.yml
 README
 t/webkit.t
 COPYING
