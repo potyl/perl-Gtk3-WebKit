@@ -41,7 +41,7 @@ use base 'Exporter';
 
 use Glib::Object::Introspection;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 
 use constant {
