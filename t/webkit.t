@@ -17,6 +17,9 @@ BEGIN {
 
 
 sub main {
+    # Grab the session so that headless unit test don't crash, see RT 93421
+    my $session = Gtk3::WebKit::get_default_session();
+
     my $view = Gtk3::WebKit::WebView->new();
     isa_ok($view, 'Gtk3::WebKit::WebView');
     return 0;
