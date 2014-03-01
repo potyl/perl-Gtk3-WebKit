@@ -1,5 +1,8 @@
 Revision history for Gtk3::WebKit
 
+0.05 Sat Mar  1 07:30:12 CET 2014
+    RT 93421 - Unit tests can run in headless Fedora 20
+
 0.04 Mon Apr 15 22:13:50 CEST 2013
     Tests don't fail on a headless system
     MYMETA files are no longer in the bundle
