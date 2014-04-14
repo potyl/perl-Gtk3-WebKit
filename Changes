@@ -1,5 +1,9 @@
 Revision history for Gtk3::WebKit
 
+0.06 Mon Apr 14 22:27:41 CEST 2014
+    Migrate to Dist::Zilla
+    Issue #5 - Fix installation failing if Test::NeedsDisplay is not installed
+
 0.05 Sat Mar  1 07:30:12 CET 2014
     RT 93421 - Unit tests can run in headless Fedora 20
 
