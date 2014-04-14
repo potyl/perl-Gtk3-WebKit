@@ -41,8 +41,6 @@ use base 'Exporter';
 
 use Glib::Object::Introspection;
 
-our $VERSION = '0.05';
-
 
 use constant {
     # XPath result types
